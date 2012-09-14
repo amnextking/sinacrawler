@@ -1,20 +1,7 @@
 package com.weibo.sinacrawler;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +19,7 @@ public class TestMain {
 	public static ArrayList<Long> sendUserList = new ArrayList<Long>();
 	ParallelUtil parallelUtil = new ParallelUtil();
 
-//	public static String lunwenContent = "http://www.younilunwen.com    有你论文网由在校博士生与高校教师组成，为您提供原创论文代写代发。有你论文网真诚欢迎您的光临与惠顾！！！";
+	public static String lunwenContent = "有你论文网由在校博士生与高校教师组成，为您提供原创论文代写代发。有你论文网真诚欢迎您的光临与惠顾！！！";
 //		+ "有你论文网由在校博士生与高校教师组成，为您提供原创论文代写代发。有你论文网真诚欢迎您的光临与惠顾！！！";
 
 	public static String dianpuContent = "  http://shop70611321.taobao.com  "
@@ -98,13 +85,9 @@ public class TestMain {
 					TimeUnit.MINUTES.sleep(10);		
 					
 				}else if(postReturnInfo.getReturnMsg().contains("抱歉，此微博不存在哦，换一个试试吧")){
-					System.out.println("抱歉，此微博不存在， 用户: " + userId);
 					parallelUtil.deleteUser(userId);
 					System.out.println("send " + userId + " error, delete the user. ");
 					
-				}else if(postReturnInfo.getReturnMsg().contains("抱歉，此内容违反了")){
-					System.out.println("封禁user： " + userId + "   封禁content： " + realContent);
-				
 				}else if(postReturnInfo.getReturnMsg().contains("不要太贪心哦，该微博已经评论过了")){
 					System.out.println("user： " + userId + postReturnInfo.getReturnMsg());
 				
@@ -138,35 +121,40 @@ public class TestMain {
 					atUserIdList.add(userId);
 					parallelUtil.finishSend(atUserIdList);
 					
-					TimeUnit.SECONDS.sleep(15);
+					TimeUnit.SECONDS.sleep(10);
 				}else if(postReturnInfo.getReturnMsg().contains("抱歉，根据用户的设置，你无法对此微博进行评论")){
 					System.out.println("can not comment user " + userId);
-
+					parallelUtil.deleteUser(userId);
+					System.out.println("send " + userId + " error, delete the user. ");
+					
 				}else if(postReturnInfo.getReturnMsg().contains("微博发的太多啦，休息一会再发啦")){				
 					System.out.println("操作过于频繁,等待10分钟");
 					TimeUnit.MINUTES.sleep(10);		
 					
 				}else if(postReturnInfo.getReturnMsg().contains("抱歉，此微博不存在哦，换一个试试吧")){
 					System.out.println("抱歉，此微博不存在， 用户: " + userId);
-																
-				}else if(postReturnInfo.getReturnMsg().contains("抱歉，此内容违反了")){
-					System.out.println("封禁user： " + userId + "   封禁content： " + realContent);
-				}else{
-					System.out.println("mail error message:" + postReturnInfo.getReturnMsg());
-					
 					parallelUtil.deleteUser(userId);
 					System.out.println("send " + userId + " error, delete the user. ");
-
+					
+				}else if(postReturnInfo.getReturnMsg().contains("不要太贪心哦，该微博已经评论过了")){
+					System.out.println("user： " + userId + postReturnInfo.getReturnMsg());
+				
+				}else{
+					System.out.println("mail error message:" + postReturnInfo.getReturnMsg());
+					parallelUtil.deleteUser(userId);
+					System.out.println("send " + userId + " error, delete the user. ");
+	
 				}
+				TimeUnit.SECONDS.sleep(5);
 			}
 		}
 	}
-	public static String lunwenContent = " www.younilunwen.com ";
+
 	public static void main(String[] args) throws Exception{
 		TestMain testMain = new TestMain();
 		int start =0;
-		int step = 10;
-		int length = 2;
+		int step = 100;
+		int length = 10;
 		
 		System.setProperty( "org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog" );
 		HttpClient client = new HttpClient();
@@ -191,33 +179,29 @@ public class TestMain {
 		List<Long> atUserIdList = new ArrayList<Long>();
 		for(int index=0; index <length; index++ ){
 			
-//			testMain.getSendUserList( ++start, step );
+			testMain.getSendUserList( ++start, step );
 			
-//			sendUserList.add(1830322461L);
-			sendUserList.add(2098861353L);
-			sendUserList.add(2098861353L);
-			
-//			sendUserList.add(2099582195L);
+			//自己，检查发送是否成功
+			sendUserList.add(0, 2098861353L);
 			
 			int size = sendUserList.size();
 			for(int i= 0; i<size; i++){
 				try {
 					
-//					if(atSize < 5 ){
-//						atUserIdList.add(sendUserList.get(i));
-//						atSize++;
-//					}else{
-//						
-//						sendNum++;
-//						System.out.print( sendNum*5 + " > ");
-//						testMain.sendMessage(atUserIdList.get(0), atUserIdList.subList(1, 5), sinaLogin, lunwenContent);
-//						testMain.sendMessage(atUserIdList.get(0), atUserIdList.subList(1, 5), qqLogin, dianpuContent);
-						testMain.sendMessage(sendUserList.get(i), sinaLogin, lunwenContent);
+					if(atSize < 5 ){
+						atUserIdList.add(sendUserList.get(i));
+						atSize++;
+					}else{
 						
-//						atSize = 1;
-//						atUserIdList.clear();
-//						atUserIdList.add(sendUserList.get(i));
-//					}
+						sendNum++;
+						System.out.print( sendNum*5 + " > ");
+						testMain.sendMessage(atUserIdList.get(0), atUserIdList.subList(1, 5), sinaLogin, lunwenContent);
+//						testMain.sendMessage(sendUserList.get(i), sinaLogin, lunwenContent);
+						
+						atSize = 1;
+						atUserIdList.clear();
+						atUserIdList.add(sendUserList.get(i));
+					}
 					
 				} catch (Exception e) {
 					System.out.println(e.getMessage());
